@@ -43,7 +43,7 @@ async function run() {
                 console.log(user.email, 'already exists');
                 return;
             }
-            
+
             const result = await userCollection.insertOne(user);
             res.send(result)
         })
@@ -54,12 +54,20 @@ async function run() {
             const tasks = await taskCollection.find().toArray();
             res.send(tasks);
         })
-        
+
         app.get('/tasks/:email', async (req, res) => {
             const email = req.params.email;
             const query = { user_email: email };
             const tasks = await taskCollection.find(query).toArray();
             res.send(tasks);
+        })
+
+        app.post('/tasks', async(req, res)=>{
+            const task = req.body
+            console.log(task)
+            const result = await taskCollection.insertOne(task)
+            console.log(result)
+            res.send(result)
         })
 
         app.delete('/tasks/:id', async (req, res) => {
@@ -71,6 +79,22 @@ async function run() {
             res.send(result);
         })
 
+        app.put('/tasks/:id', async (req, res) => {
+            const id = req.params.id
+            console.log(req.body)
+            const query = { _id: new ObjectId(id) }
+            const updatedData = {
+                $set: {
+                    contentTitle: req.body.contentTitle,
+                    content: req.body.content,
+                    columnId: req.body.columnId
+                }
+            }
+            console.log(updatedData)
+            const options = { upsert: true };
+            const result = await taskCollection.updateOne(query, updatedData, options)
+            res.send(result)
+        })
 
 
 
